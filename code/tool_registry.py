@@ -10,8 +10,8 @@ from pydantic import Field
 from pydantic_ai import FunctionToolset, RunContext, Tool
 
 from corpus import (
-    Breadcrumbs,
     breadcrumb_for_slice,
+    CorpusPathError,
     iter_text_files,
     match_find_pattern,
     read_utf8_lines,
@@ -21,6 +21,7 @@ from corpus import (
     strip_frontmatter,
 )
 from schemas import TicketDeps
+from tool_errors import ErrorWrappingToolset, ToolEncodingError, ToolPathError
 
 CANONICAL_TOOL_NAMES = ("read", "grep", "find", "ls")
 
@@ -89,16 +90,22 @@ def read(
 ) -> str:
     """Read a UTF-8 text file with optional line slicing."""
 
-    resolved = resolve_data_path(data_root=ctx.deps.data_root, tool_path=path)
+    try:
+        resolved = resolve_data_path(data_root=ctx.deps.data_root, tool_path=path)
+    except CorpusPathError as error:
+        raise ToolPathError(str(error)) from error
     if not resolved.is_file():
-        raise ValueError(f"path is not a file: {path}")
+        raise ToolPathError(f"path is not a file: {path}")
 
-    lines = strip_frontmatter(read_utf8_lines(resolved))
+    try:
+        lines = strip_frontmatter(read_utf8_lines(resolved))
+    except UnicodeDecodeError as error:
+        raise ToolEncodingError(f"{path} is not valid UTF-8 text") from error
     start_index = (offset - 1) if offset is not None else 0
     if not lines and offset not in (None, 1):
-        raise ValueError(f"offset {offset} is beyond end of file")
+        raise ToolPathError(f"offset {offset} is beyond end of file")
     if start_index >= len(lines) and lines:
-        raise ValueError(f"offset {offset} is beyond end of file")
+        raise ToolPathError(f"offset {offset} is beyond end of file")
 
     selected = lines[start_index:]
     effective_limit = min(limit if limit is not None else READ_MAX_LINES, READ_MAX_LINES)
@@ -130,7 +137,10 @@ def grep(
 ) -> str:
     """Search corpus files for matching lines and return grouped evidence blocks."""
 
-    search_root = resolve_data_path(data_root=ctx.deps.data_root, tool_path=path)
+    try:
+        search_root = resolve_data_path(data_root=ctx.deps.data_root, tool_path=path)
+    except CorpusPathError as error:
+        raise ToolPathError(str(error)) from error
     files = [search_root] if search_root.is_file() else iter_text_files(search_root)
     regex = _compile_pattern(pattern, literal=literal, ignore_case=ignore_case)
 
@@ -179,7 +189,10 @@ def find(
 ) -> str:
     """Find matching files by glob-like pattern under the data root."""
 
-    search_root = resolve_data_path(data_root=ctx.deps.data_root, tool_path=path)
+    try:
+        search_root = resolve_data_path(data_root=ctx.deps.data_root, tool_path=path)
+    except CorpusPathError as error:
+        raise ToolPathError(str(error)) from error
     files = iter_text_files(search_root) if search_root.is_dir() else [search_root]
     matches = match_find_pattern(files, pattern)
     return _render_find_results(data_root=ctx.deps.data_root, matches=matches)
@@ -191,9 +204,12 @@ def ls(
 ) -> str:
     """List a directory under the data root."""
 
-    resolved = resolve_data_path(data_root=ctx.deps.data_root, tool_path=path)
+    try:
+        resolved = resolve_data_path(data_root=ctx.deps.data_root, tool_path=path)
+    except CorpusPathError as error:
+        raise ToolPathError(str(error)) from error
     if not resolved.is_dir():
-        raise ValueError(f"path is not a directory: {path}")
+        raise ToolPathError(f"path is not a directory: {path}")
     return _render_ls_entries(list(resolved.iterdir()))
 
 
@@ -236,7 +252,7 @@ TOOLS_BY_NAME = {
 
 def build_canonical_toolset(
     tool_names: Sequence[str] = CANONICAL_TOOL_NAMES,
-) -> FunctionToolset[TicketDeps]:
+) -> ErrorWrappingToolset:
     if not tool_names:
         raise ValueError("canonical toolset must not be empty")
     resolved_tools = []
@@ -249,4 +265,4 @@ def build_canonical_toolset(
             resolved_tools.append(TOOLS_BY_NAME[tool_name])
         except KeyError as error:
             raise ValueError(f"unknown canonical tool: {tool_name}") from error
-    return FunctionToolset[TicketDeps](resolved_tools, strict=True)
+    return ErrorWrappingToolset(FunctionToolset[TicketDeps](resolved_tools, strict=True))

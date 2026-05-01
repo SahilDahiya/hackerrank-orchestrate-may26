@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from enum import StrEnum
 from pathlib import Path
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 
 class TicketStatus(StrEnum):
@@ -58,15 +58,30 @@ class TicketResult(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True)
 
     status: TicketStatus
-    product_area: str = Field(min_length=1)
+    product_area: str = Field(default="")
     response: str = Field(min_length=1)
     justification: str = Field(min_length=1)
     request_type: RequestType
 
     @field_validator("product_area", "response", "justification")
     @classmethod
-    def strip_non_empty(cls, value: str) -> str:
+    def strip_values(cls, value: str) -> str:
+        return value.strip()
+
+    @field_validator("response", "justification")
+    @classmethod
+    def require_non_empty_text(cls, value: str) -> str:
         normalized = value.strip()
         if not normalized:
             raise ValueError("field must not be blank")
         return normalized
+
+    @model_validator(mode="after")
+    def validate_product_area(self) -> TicketResult:
+        if self.product_area:
+            return self
+        if self.request_type == RequestType.INVALID or self.status == TicketStatus.ESCALATED:
+            return self
+        raise ValueError(
+            "product_area must not be blank for non-invalid, non-escalated results"
+        )
