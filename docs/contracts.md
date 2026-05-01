@@ -157,7 +157,11 @@ deliberately rather than accreting ad hoc parameters.
 
 Tool usage policy for the canonical agent:
 
-- always inspect the local corpus with tools before answering
+- use tools before any grounded reply
+- inspect the local corpus with tools when evidence is needed to answer or
+  confirm escalation
+- self-evident unsupported, outage-like, invalid, or not-answerable tickets
+  may escalate without forced tool calls
 - use tools against the provided corpus only
 - preserve enough source breadcrumb context for grounded `product_area` and
   `justification`

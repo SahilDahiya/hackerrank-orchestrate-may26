@@ -154,6 +154,9 @@ It should state only the rules the model itself must internalize:
 
 - it is handling one support ticket
 - it must use the canonical tools
+- it must use tools before any grounded reply
+- it may escalate obvious unsupported, outage-like, invalid, or
+  not-answerable tickets without forced tool calls
 - it must ground decisions in the provided corpus
 - it must escalate when evidence or safety requires it
 - it must return the required final fields

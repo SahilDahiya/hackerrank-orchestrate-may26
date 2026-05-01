@@ -205,8 +205,10 @@ current-directory state between tool calls.
 
 ## Prompt And Output Policy
 
-The canonical agent should always inspect the local corpus with tools before
-answering.
+The canonical agent should use tools before any grounded reply and inspect the
+local corpus when evidence is needed to answer or confirm escalation. A
+self-evident unsupported, outage-like, invalid, or not-answerable ticket may
+escalate without forced tool calls.
 
 The prompt should explicitly enforce:
 
