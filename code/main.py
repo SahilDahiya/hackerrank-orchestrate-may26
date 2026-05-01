@@ -6,7 +6,7 @@ from pathlib import Path
 
 from model_resolver import load_dotenv_file, resolve_model_name
 from runtime import run_ticket_sync
-from schemas import RequestType, RunTicketRequest, TicketResult, TicketStatus
+from schemas import RunTicketRequest, TicketResult
 
 OUTPUT_FIELDNAMES = [
     "status",
@@ -49,28 +49,6 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
-def normalize_company_label(company: str) -> str:
-    normalized = company.strip()
-    if not normalized or normalized.lower() == "none":
-        return "general"
-    return normalized
-
-
-def build_fallback_result(*, company: str, reason: str) -> TicketResult:
-    return TicketResult(
-        status=TicketStatus.ESCALATED,
-        product_area=normalize_company_label(company),
-        response=(
-            "Your request has been escalated to a support specialist for further review."
-        ),
-        justification=(
-            "Escalated because the agent could not produce a valid grounded response "
-            f"from the provided corpus: {reason}"
-        ),
-        request_type=RequestType.PRODUCT_ISSUE,
-    )
-
-
 def build_request(
     *,
     row: dict[str, str],
@@ -108,20 +86,16 @@ def run_batch(
         rows = list(reader)
 
     output_csv.parent.mkdir(parents=True, exist_ok=True)
-    with output_csv.open("w", newline="", encoding="utf-8") as outfile:
+    temp_output = output_csv.with_suffix(output_csv.suffix + ".tmp")
+    with temp_output.open("w", newline="", encoding="utf-8") as outfile:
         writer = csv.DictWriter(outfile, fieldnames=OUTPUT_FIELDNAMES)
         writer.writeheader()
 
         for row_index, row in enumerate(rows, start=1):
             request = build_request(row=row, row_index=row_index, data_root=data_root)
-            try:
-                result = run_ticket_sync(request=request, model=model_name)
-            except Exception as error:
-                result = build_fallback_result(
-                    company=request.company,
-                    reason=type(error).__name__,
-                )
+            result = run_ticket_sync(request=request, model=model_name)
             writer.writerow(row_from_result(result))
+    temp_output.replace(output_csv)
 
 
 def main() -> None:

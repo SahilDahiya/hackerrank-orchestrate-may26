@@ -55,7 +55,7 @@ class TicketDeps:
 
 
 class TicketResult(BaseModel):
-    model_config = ConfigDict(extra="forbid", frozen=True, strict=True)
+    model_config = ConfigDict(extra="forbid", frozen=True)
 
     status: TicketStatus
     product_area: str = Field(min_length=1)

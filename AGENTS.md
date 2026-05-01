@@ -210,6 +210,34 @@ without updating this file.
   etc.). Never hardcode.
 ---
 
+## Testing
+
+- For bug reports, start with a reproducing test.
+- Default to strict TDD for durable feature development.
+- Use full red-to-green cycles: failing test first, minimal fix, then refactor.
+- Run relevant tests when available and say what you did not run.
+
+## Engineering Direction
+
+- No fallback behavior, ever.
+- Fail hard on failure conditions.
+- No backward compatibility guarantees.
+- Forward-only development: do not carry legacy baggage.
+- The Go TUI is presentation only. Backend semantics, tool meaning, event meaning, session meaning, and public contract ownership stay in Python.
+- Do not duplicate backend decision logic in the Go TUI. If the shell needs richer meaning, add it to the backend contract first.
+
+## Hard-Cut Product Policy
+
+- Optimize for one canonical current-state implementation.
+- Prefer fail-fast diagnostics and explicit recovery steps.
+- Invalid durable state must never be written.
+- Write paths must enforce the full canonical invariants before persistence.
+- Read-path validation is defense in depth, not the first line of enforcement.
+- Do not add migration shims, compatibility bridges, fallback paths, or dual behavior unless the user explicitly asks for them.
+- Do not add automatic migration.
+- Do not add silent fallbacks.
+- If temporary compatibility code is introduced, the same diff must state why it exists and the exact deletion criteria.
+
 
 ## 7. CROSS-PLATFORM AND AGENT-COMPATIBILITY NOTES
 
