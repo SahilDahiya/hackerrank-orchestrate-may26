@@ -95,6 +95,8 @@ def read(
 
     lines = strip_frontmatter(read_utf8_lines(resolved))
     start_index = (offset - 1) if offset is not None else 0
+    if not lines and offset not in (None, 1):
+        raise ValueError(f"offset {offset} is beyond end of file")
     if start_index >= len(lines) and lines:
         raise ValueError(f"offset {offset} is beyond end of file")
 
