@@ -42,7 +42,12 @@ class MainBatchTests(unittest.TestCase):
 
             call_count = 0
 
-            def fake_run_ticket_sync(*, request: RunTicketRequest, model: str) -> TicketResult:
+            def fake_run_ticket_sync(
+                *,
+                request: RunTicketRequest,
+                model: str,
+                audit_path: Path | None = None,
+            ) -> TicketResult:
                 nonlocal call_count
                 call_count += 1
                 if call_count == 2:
@@ -84,6 +89,57 @@ class MainBatchTests(unittest.TestCase):
         )
         self.assertEqual(result.status, TicketStatus.REPLIED)
         self.assertEqual(result.request_type, RequestType.PRODUCT_ISSUE)
+
+    def test_build_request_scopes_known_company_to_company_subtree(self) -> None:
+        request = main.build_request(
+            row={
+                "Issue": "Issue body",
+                "Subject": "Subject text",
+                "Company": "Claude",
+            },
+            row_index=1,
+            data_root=self.data_root,
+        )
+        self.assertEqual(request.company, "Claude")
+        self.assertEqual(request.data_root, self.data_root / "claude")
+
+    def test_build_request_keeps_none_company_at_shared_root(self) -> None:
+        request = main.build_request(
+            row={
+                "Issue": "Issue body",
+                "Subject": "Subject text",
+                "Company": "None",
+            },
+            row_index=2,
+            data_root=self.data_root,
+        )
+        self.assertEqual(request.company, "None")
+        self.assertEqual(request.data_root, self.data_root)
+
+    def test_build_request_rejects_unknown_company_label(self) -> None:
+        with self.assertRaises(ValueError):
+            main.build_request(
+                row={
+                    "Issue": "Issue body",
+                    "Subject": "Subject text",
+                    "Company": "Acme",
+                },
+                row_index=3,
+                data_root=self.data_root,
+            )
+
+    def test_audit_path_for_ticket_flattens_sessions_into_one_directory(self) -> None:
+        input_csv = Path("/tmp/sample_support_tickets.csv")
+        audit_path = main.audit_path_for_ticket(
+            audit_root=main.AUDIT_ROOT,
+            input_csv=input_csv,
+            run_id="20260501T154233Z",
+            ticket_id="ticket-7",
+        )
+        self.assertEqual(
+            audit_path,
+            main.AUDIT_ROOT / "20260501T154233Z__sample_support_tickets__ticket-7.jsonl",
+        )
 
 
 if __name__ == "__main__":
