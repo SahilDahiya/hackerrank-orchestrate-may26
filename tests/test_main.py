@@ -67,6 +67,10 @@ class MainBatchTests(unittest.TestCase):
                     )
 
             self.assertFalse(output_csv.exists(), "batch failure should not leave durable output")
+            self.assertFalse(
+                output_csv.with_suffix(".csv.tmp").exists(),
+                "batch failure should not leave a partial temp output behind",
+            )
 
     def test_ticket_result_accepts_canonical_string_values(self) -> None:
         result = TicketResult.model_validate(

@@ -87,15 +87,20 @@ def run_batch(
 
     output_csv.parent.mkdir(parents=True, exist_ok=True)
     temp_output = output_csv.with_suffix(output_csv.suffix + ".tmp")
-    with temp_output.open("w", newline="", encoding="utf-8") as outfile:
-        writer = csv.DictWriter(outfile, fieldnames=OUTPUT_FIELDNAMES)
-        writer.writeheader()
+    try:
+        with temp_output.open("w", newline="", encoding="utf-8") as outfile:
+            writer = csv.DictWriter(outfile, fieldnames=OUTPUT_FIELDNAMES)
+            writer.writeheader()
 
-        for row_index, row in enumerate(rows, start=1):
-            request = build_request(row=row, row_index=row_index, data_root=data_root)
-            result = run_ticket_sync(request=request, model=model_name)
-            writer.writerow(row_from_result(result))
-    temp_output.replace(output_csv)
+            for row_index, row in enumerate(rows, start=1):
+                request = build_request(row=row, row_index=row_index, data_root=data_root)
+                result = run_ticket_sync(request=request, model=model_name)
+                writer.writerow(row_from_result(result))
+        temp_output.replace(output_csv)
+    except Exception:
+        if temp_output.exists():
+            temp_output.unlink()
+        raise
 
 
 def main() -> None:
