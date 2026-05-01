@@ -24,11 +24,17 @@ def load_dotenv_file(dotenv_path: Path) -> None:
 
 
 def resolve_model_name(*, explicit_model: str | None = None) -> str:
-    if explicit_model:
-        return explicit_model
+    if explicit_model is not None:
+        normalized_explicit = explicit_model.strip()
+        if not normalized_explicit:
+            raise RuntimeError("Explicit model must not be blank.")
+        return normalized_explicit
     env_model = os.getenv("ORCHESTRATE_MODEL")
-    if env_model:
-        return env_model
+    if env_model is not None:
+        normalized_env_model = env_model.strip()
+        if not normalized_env_model:
+            raise RuntimeError("ORCHESTRATE_MODEL must not be blank.")
+        return normalized_env_model
     if os.getenv("OPENAI_API_KEY"):
         return DEFAULT_OPENAI_MODEL
     if os.getenv("ANTHROPIC_API_KEY"):

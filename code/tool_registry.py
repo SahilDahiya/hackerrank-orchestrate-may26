@@ -237,6 +237,8 @@ TOOLS_BY_NAME = {
 def build_canonical_toolset(
     tool_names: Sequence[str] = CANONICAL_TOOL_NAMES,
 ) -> FunctionToolset[TicketDeps]:
+    if not tool_names:
+        raise ValueError("canonical toolset must not be empty")
     resolved_tools = []
     seen_names: set[str] = set()
     for tool_name in tool_names:
