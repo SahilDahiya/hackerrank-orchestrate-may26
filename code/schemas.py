@@ -3,6 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from enum import StrEnum
 from pathlib import Path
+import re
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
@@ -63,6 +64,32 @@ class TicketResult(BaseModel):
     justification: str = Field(min_length=1)
     request_type: RequestType
 
+    @model_validator(mode="before")
+    @classmethod
+    def repair_wrapped_response_in_product_area(cls, data: object) -> object:
+        if not isinstance(data, dict):
+            return data
+        product_area = data.get("product_area")
+        if not isinstance(product_area, str):
+            return data
+        repaired = dict(data)
+        marker = '<parameter name="response">'
+        if marker in product_area:
+            before, after = product_area.split(marker, 1)
+            product_area = before
+            if not str(repaired.get("response") or "").strip():
+                repaired["response"] = after.strip()
+        cleaned_product_area = re.sub(
+            r"</?(?:antml|parameter)[^>\n]*>?",
+            "",
+            product_area,
+            flags=re.IGNORECASE,
+        ).strip()
+        if cleaned_product_area != product_area.strip():
+            repaired["product_area"] = cleaned_product_area
+            return repaired
+        return data
+
     @field_validator("product_area", "response", "justification")
     @classmethod
     def strip_values(cls, value: str) -> str:
@@ -76,12 +103,9 @@ class TicketResult(BaseModel):
             raise ValueError("field must not be blank")
         return normalized
 
-    @model_validator(mode="after")
-    def validate_product_area(self) -> TicketResult:
-        if self.product_area:
-            return self
-        if self.request_type == RequestType.INVALID or self.status == TicketStatus.ESCALATED:
-            return self
-        raise ValueError(
-            "product_area must not be blank for non-invalid, non-escalated results"
-        )
+    @field_validator("product_area")
+    @classmethod
+    def reject_markup_like_product_area(cls, value: str) -> str:
+        if "<" in value or ">" in value:
+            raise ValueError("product_area must not contain markup-like delimiters")
+        return value

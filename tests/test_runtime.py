@@ -104,17 +104,53 @@ class RuntimeTests(unittest.TestCase):
         )
         self.assertEqual(result.product_area, "")
 
-    def test_ticket_result_rejects_blank_product_area_for_grounded_reply(self) -> None:
+    def test_ticket_result_allows_blank_product_area_for_grounded_reply(self) -> None:
+        result = TicketResult.model_validate(
+            {
+                "status": "replied",
+                "product_area": "",
+                "response": "Grounded response.",
+                "justification": "Grounded in corpus.",
+                "request_type": "product_issue",
+            }
+        )
+        self.assertEqual(result.product_area, "")
+
+    def test_ticket_result_rejects_markup_like_product_area(self) -> None:
         with self.assertRaises(ValueError):
             TicketResult.model_validate(
                 {
                     "status": "replied",
-                    "product_area": "",
+                    "product_area": "<b>community</b>",
                     "response": "Grounded response.",
                     "justification": "Grounded in corpus.",
                     "request_type": "product_issue",
                 }
             )
+
+    def test_ticket_result_repairs_wrapped_response_in_product_area(self) -> None:
+        result = TicketResult.model_validate(
+            {
+                "status": "replied",
+                "product_area": '</antml_parameter>\n<parameter name="response">Repaired response text.',
+                "justification": "Grounded in corpus.",
+                "request_type": "invalid",
+            }
+        )
+        self.assertEqual(result.product_area, "")
+        self.assertEqual(result.response, "Repaired response text.")
+
+    def test_ticket_result_repairs_markup_only_product_area(self) -> None:
+        result = TicketResult.model_validate(
+            {
+                "status": "replied",
+                "product_area": "</antml{parameter>\n",
+                "response": "Grounded response.",
+                "justification": "Grounded in corpus.",
+                "request_type": "invalid",
+            }
+        )
+        self.assertEqual(result.product_area, "")
 
     def test_run_ticket_sync_writes_jsonl_audit_trail_on_success(self) -> None:
         expected = TicketResult(
