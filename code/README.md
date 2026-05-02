@@ -59,7 +59,7 @@ Use an explicit model:
 
 ```bash
 .venv/bin/python code/main.py \
-  --model openai:gpt-4.1-mini \
+  --model openai:gpt-5.4 \
   --input-csv support_tickets/support_tickets.csv \
   --output-csv support_tickets/output.csv
 ```

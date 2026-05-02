@@ -4,7 +4,7 @@ import os
 from pathlib import Path
 
 
-DEFAULT_OPENAI_MODEL = "openai:gpt-4.1-mini"
+DEFAULT_OPENAI_MODEL = "openai:gpt-5.4"
 DEFAULT_ANTHROPIC_MODEL = "anthropic:claude-3-5-sonnet-latest"
 
 

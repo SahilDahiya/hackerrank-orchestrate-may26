@@ -43,6 +43,10 @@ class ModelResolverTests(unittest.TestCase):
         ):
             self.assertEqual(model_resolver.resolve_model_name(), "openai:env-model")
 
+    def test_resolve_model_name_uses_gpt_5_4_for_openai_provider_default(self) -> None:
+        with patch.dict(os.environ, {"OPENAI_API_KEY": "k"}, clear=True):
+            self.assertEqual(model_resolver.resolve_model_name(), "openai:gpt-5.4")
+
     def test_resolve_model_name_rejects_blank_explicit_model(self) -> None:
         with patch.dict(os.environ, {}, clear=True):
             with self.assertRaises(RuntimeError):

@@ -47,7 +47,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--model",
         default=None,
-        help="Optional explicit PydanticAI model path, e.g. openai:gpt-4.1-mini",
+        help="Optional explicit PydanticAI model path, e.g. openai:gpt-5.4",
     )
     parser.add_argument(
         "--dotenv",
