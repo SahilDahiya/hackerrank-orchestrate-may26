@@ -63,7 +63,7 @@ def build_request(
     row_index: int,
     data_root: Path,
 ) -> RunTicketRequest:
-    company = (row.get("Company") or "").strip() or "None"
+    company = normalize_company_label((row.get("Company") or "").strip())
     scoped_root = resolve_ticket_data_root(data_root=data_root, company=company)
     return RunTicketRequest(
         ticket_id=f"ticket-{row_index}",
@@ -72,6 +72,19 @@ def build_request(
         issue=(row.get("Issue") or "").strip(),
         data_root=scoped_root,
     )
+
+
+def normalize_company_label(company: str) -> str:
+    normalized = company.strip()
+    if not normalized:
+        return "None"
+    lowered = normalized.casefold()
+    if lowered == "none":
+        return "None"
+    for canonical in COMPANY_DATA_DIRS:
+        if lowered == canonical.casefold():
+            return canonical
+    return normalized
 
 
 def resolve_ticket_data_root(*, data_root: Path, company: str) -> Path:

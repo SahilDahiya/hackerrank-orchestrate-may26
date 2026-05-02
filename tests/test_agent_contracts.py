@@ -40,6 +40,10 @@ class AgentContractTests(unittest.TestCase):
             instructions,
         )
         self.assertIn(
+            "When evidence supports the answer, justification should name the concrete retrieved sources, preferably with path or breadcrumb references.",
+            instructions,
+        )
+        self.assertIn(
             "Prefer the strongest grounded support-area signal from the retrieved evidence: use Product when it is a clearer grounded label than Area, otherwise use Area.",
             instructions,
         )

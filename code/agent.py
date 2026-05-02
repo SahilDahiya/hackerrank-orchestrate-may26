@@ -72,6 +72,7 @@ def build_agent_instructions(tool_names: Sequence[str] = CANONICAL_TOOL_NAMES) -
                 "response is user-facing and must not mention the corpus, retrieved evidence, or documentation gaps directly.",
                 "CRITICAL: response is user-facing and must not include raw repo or filesystem paths.",
                 "CRITICAL: justification must always cite relevant corpus evidence or explicitly state that the corpus was insufficient.",
+                "When evidence supports the answer, justification should name the concrete retrieved sources, preferably with path or breadcrumb references.",
             ],
         ),
         (

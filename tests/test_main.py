@@ -103,6 +103,19 @@ class MainBatchTests(unittest.TestCase):
         self.assertEqual(request.company, "Claude")
         self.assertEqual(request.data_root, self.data_root / "claude")
 
+    def test_build_request_scopes_known_company_case_insensitively(self) -> None:
+        request = main.build_request(
+            row={
+                "Issue": "Issue body",
+                "Subject": "Subject text",
+                "Company": "HAckerrank",
+            },
+            row_index=11,
+            data_root=self.data_root,
+        )
+        self.assertEqual(request.company, "HackerRank")
+        self.assertEqual(request.data_root, self.data_root / "hackerrank")
+
     def test_build_request_keeps_none_company_at_shared_root(self) -> None:
         request = main.build_request(
             row={
