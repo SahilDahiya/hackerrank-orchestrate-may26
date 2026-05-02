@@ -55,6 +55,7 @@ def build_agent_instructions(tool_names: Sequence[str] = CANONICAL_TOOL_NAMES) -
                 "If the ticket is clearly invalid, off-topic, dangerous, or outage-like from the request itself, you may escalate without forcing unnecessary tool calls.",
                 "If the ticket is risky, unsupported, ambiguous, or the evidence is weak, insufficient, or conflicting, escalate.",
                 "CRITICAL: After tool-based exploration, if the retrieved support documentation is insufficient for a safe or adequate reply, escalate.",
+                "CRITICAL: A ticket may still be escalated even when you provide a concise user-facing response; use status=escalated whenever the case requires human review, unsupported judgment, or action beyond what the retrieved documentation can safely resolve.",
                 "If the ticket describes an outage, inaccessible service, or a fix-my-account request without strong grounded evidence, escalate instead of inferring a product.",
                 "Escalate when the missing evidence makes a safe or adequate reply impossible.",
             ],

@@ -26,6 +26,10 @@ class AgentContractTests(unittest.TestCase):
             "After tool-based exploration, if the retrieved support documentation is insufficient for a safe or adequate reply, escalate.",
             instructions,
         )
+        self.assertIn(
+            "A ticket may still be escalated even when you provide a concise user-facing response; use status=escalated whenever the case requires human review, unsupported judgment, or action beyond what the retrieved documentation can safely resolve.",
+            instructions,
+        )
         self.assertIn("status must be one of: replied, escalated.", instructions)
         self.assertIn(
             "request_type must be one of: product_issue, feature_request, bug, invalid.",
