@@ -80,8 +80,8 @@ def resolve_ticket_data_root(*, data_root: Path, company: str) -> Path:
         return data_root
     try:
         return data_root / COMPANY_DATA_DIRS[normalized]
-    except KeyError as error:
-        raise ValueError(f"Unsupported company label: {company}") from error
+    except KeyError:
+        return data_root
 
 
 def row_from_result(result: TicketResult) -> dict[str, str]:

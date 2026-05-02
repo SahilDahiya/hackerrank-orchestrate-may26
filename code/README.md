@@ -87,7 +87,7 @@ Focused tests:
   - `Claude` -> `data/claude`
   - `HackerRank` -> `data/hackerrank`
   - `Visa` -> `data/visa`
-  - `None` -> shared `data/`
+- `None` and unexpected company labels stay at the shared `data/` root.
 - Tools are read-only and explicit:
   - `read(path, offset, limit)`
   - `grep(pattern, path, ignore_case, literal, limit)`

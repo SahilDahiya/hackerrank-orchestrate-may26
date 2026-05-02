@@ -62,20 +62,20 @@ Why:
 - This follows the JACA pattern of keeping base instructions small and pushing
   as much meaning as possible into contracts and tool/runtime behavior.
 
-### 5. Known-company tickets now narrow the corpus root
+### 5. Known company labels narrow corpus routing
 
 - `Claude` tickets use `data/claude`
 - `HackerRank` tickets use `data/hackerrank`
 - `Visa` tickets use `data/visa`
-- `None` stays at the shared `data/` root
-- Unknown company labels fail hard
+- `None` and unexpected company labels stay at the shared `data/` root
+- The raw `Company` value is still preserved in the request for the agent
 
 Why:
 
-- This removes an avoidable source of cross-corpus noise when the domain is
-  already known from input.
-- It still preserves the shared-root path for `None`, where broader inference
-  is part of the task.
+- The written challenge schema explicitly constrains `company` to
+  `HackerRank`, `Claude`, `Visa`, or `None`.
+- Narrowing on those documented values reduces cross-corpus noise while still
+  preserving broad search for `None` and unexpected input.
 
 ### 6. Expected tool misuse is wrapped as an explicit model-visible result
 

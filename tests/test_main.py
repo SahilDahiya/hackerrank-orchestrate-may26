@@ -116,17 +116,18 @@ class MainBatchTests(unittest.TestCase):
         self.assertEqual(request.company, "None")
         self.assertEqual(request.data_root, self.data_root)
 
-    def test_build_request_rejects_unknown_company_label(self) -> None:
-        with self.assertRaises(ValueError):
-            main.build_request(
-                row={
-                    "Issue": "Issue body",
-                    "Subject": "Subject text",
-                    "Company": "Acme",
-                },
-                row_index=3,
-                data_root=self.data_root,
-            )
+    def test_build_request_keeps_unknown_company_label_at_shared_root(self) -> None:
+        request = main.build_request(
+            row={
+                "Issue": "Issue body",
+                "Subject": "Subject text",
+                "Company": "Acme",
+            },
+            row_index=3,
+            data_root=self.data_root,
+        )
+        self.assertEqual(request.company, "Acme")
+        self.assertEqual(request.data_root, self.data_root)
 
     def test_audit_path_for_ticket_flattens_sessions_into_one_directory(self) -> None:
         input_csv = Path("/tmp/sample_support_tickets.csv")
