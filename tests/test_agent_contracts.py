@@ -19,15 +19,11 @@ class AgentContractTests(unittest.TestCase):
             instructions,
         )
         self.assertIn(
-            "If the ticket is clearly invalid, off-topic, dangerous, or outage-like from the request itself, you may escalate without forcing unnecessary tool calls.",
+            "If the ticket is clearly dangerous or outage-like from the request itself, you may escalate without forcing unnecessary tool calls.",
             instructions,
         )
         self.assertIn(
             "After tool-based exploration, if the retrieved support documentation is insufficient for a safe or adequate reply, escalate.",
-            instructions,
-        )
-        self.assertIn(
-            "A ticket may still be escalated even when you provide a concise user-facing response; use status=escalated whenever the case requires human review, unsupported judgment, or action beyond what the retrieved documentation can safely resolve.",
             instructions,
         )
         self.assertIn("status must be one of: replied, escalated.", instructions)
@@ -68,7 +64,7 @@ class AgentContractTests(unittest.TestCase):
             instructions,
         )
         self.assertIn(
-            "For out-of-scope or non-support conversational requests, reply only that the request is out of scope and prefer product_area=conversation_management.",
+            "For out-of-scope or non-support conversational requests, usually use status=replied, reply only that the request is out of scope, and prefer product_area=conversation_management.",
             instructions,
         )
         self.assertIn(

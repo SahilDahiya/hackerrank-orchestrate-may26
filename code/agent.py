@@ -43,7 +43,7 @@ def build_agent_instructions(tool_names: Sequence[str] = CANONICAL_TOOL_NAMES) -
                 "request_type must be one of: product_issue, feature_request, bug, invalid.",
                 "If the ticket does not contain a real support request, classify it as invalid.",
                 "If the request is unrelated to the supported product corpus, do not answer the underlying world-knowledge or off-topic question.",
-                "For out-of-scope or non-support conversational requests, reply only that the request is out of scope and prefer product_area=conversation_management.",
+                "For out-of-scope or non-support conversational requests, usually use status=replied, reply only that the request is out of scope, and prefer product_area=conversation_management.",
                 "CRITICAL: Do not redirect an invalid, dangerous, or off-topic request to a superficially related supported action just because some keywords overlap.",
                 "Tickets describing outages, broken pages, or service malfunctions should usually use request_type=bug when grounded by the ticket and evidence.",
                 "For tickets about private or sensitive conversation data, prefer a privacy-oriented product_area label when the evidence supports it.",
@@ -52,10 +52,9 @@ def build_agent_instructions(tool_names: Sequence[str] = CANONICAL_TOOL_NAMES) -
         (
             "escalation_policy",
             [
-                "If the ticket is clearly invalid, off-topic, dangerous, or outage-like from the request itself, you may escalate without forcing unnecessary tool calls.",
+                "If the ticket is clearly dangerous or outage-like from the request itself, you may escalate without forcing unnecessary tool calls.",
                 "If the ticket is risky, unsupported, ambiguous, or the evidence is weak, insufficient, or conflicting, escalate.",
                 "CRITICAL: After tool-based exploration, if the retrieved support documentation is insufficient for a safe or adequate reply, escalate.",
-                "CRITICAL: A ticket may still be escalated even when you provide a concise user-facing response; use status=escalated whenever the case requires human review, unsupported judgment, or action beyond what the retrieved documentation can safely resolve.",
                 "If the ticket describes an outage, inaccessible service, or a fix-my-account request without strong grounded evidence, escalate instead of inferring a product.",
                 "Escalate when the missing evidence makes a safe or adequate reply impossible.",
             ],
