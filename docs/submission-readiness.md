@@ -31,24 +31,25 @@ Current read:
 
 ## Remaining release risk
 
-- full-batch provider-backed runtime latency remains the largest operational
-  risk
-- semantic quality is much improved on targeted sample rows
+- semantic quality on real tickets remains the largest release risk
+- product-area labeling is still noisy, though this is a softer field than
+  status and request type
 
 ## Latest full-run checkpoint
 
-- command attempted:
+- command run:
   - `python code/main.py --input-csv support_tickets/support_tickets.csv --output-csv support_tickets/output.csv`
-- first failure found and fixed:
-  - PydanticAI default `request_limit=50` caused a real `UsageLimitExceeded`
-    failure on the 29-row run
-- current blocker after that fix:
-  - the full 29-row run no longer fails immediately on request limit, but it
-    still does not complete within a practical checkpoint window, so
-    evaluator-facing operability is not yet strong
+- current state:
+  - the batch run completes and writes `support_tickets/output.csv`
+  - per-ticket JSONL audit files are written under `artifacts/sessions/`
+  - the output schema matches the evaluator contract:
+    `status,product_area,response,justification,request_type`
+- current practical risk:
+  - the remaining risk is answer quality on specific real tickets, not batch
+    completion or file generation
 
 Current release read:
 
-- core contracts and correctness checks are in place
+- core contracts and batch operability are in place
 - targeted live quality is materially better
-- full submission throughput is still the remaining blocker
+- the remaining blocker is semantic quality on hard real-ticket cases
