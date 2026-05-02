@@ -19,6 +19,10 @@ class AgentContractTests(unittest.TestCase):
             instructions,
         )
         self.assertIn(
+            "Keep exploration bounded: usually do no more than two searches and two document reads before deciding, unless a retrieved document explicitly points to one more supporting document.",
+            instructions,
+        )
+        self.assertIn(
             "If the ticket is clearly dangerous or outage-like from the request itself, you may escalate without forcing unnecessary tool calls.",
             instructions,
         )
@@ -105,6 +109,10 @@ class AgentContractTests(unittest.TestCase):
         )
         self.assertIn(
             "Escalate when the missing evidence makes a safe or adequate reply impossible.",
+            instructions,
+        )
+        self.assertIn(
+            "Do not include XML tags, antml tags, parameter wrappers, or markdown field labels inside any output field values. Field values must be plain text only.",
             instructions,
         )
 

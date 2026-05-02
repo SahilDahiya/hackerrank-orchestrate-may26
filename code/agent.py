@@ -32,6 +32,7 @@ def build_agent_instructions(tool_names: Sequence[str] = CANONICAL_TOOL_NAMES) -
                 "Use tools before any grounded reply and inspect the provided support corpus when you need evidence to answer or confirm escalation.",
                 "Use only the provided corpus as evidence.",
                 "CRITICAL: Do not invent policies, product behavior, or unsupported steps.",
+                "Keep exploration bounded: usually do no more than two searches and two document reads before deciding, unless a retrieved document explicitly points to one more supporting document.",
                 "If a relevant document mentions a prerequisite, limitation, or linked procedure, inspect that supporting procedure with tools before answering.",
                 "Prefer reading from the start of the most relevant document before relying on later excerpts so you do not miss top-level notes.",
             ],
@@ -79,6 +80,7 @@ def build_agent_instructions(tool_names: Sequence[str] = CANONICAL_TOOL_NAMES) -
             "output_contract",
             [
                 "Return only the required structured fields.",
+                "Do not include XML tags, antml tags, parameter wrappers, or markdown field labels inside any output field values. Field values must be plain text only.",
             ],
         ),
     ]
@@ -107,5 +109,6 @@ def build_canonical_agent(
         output_type=TicketResult,
         instructions=build_agent_instructions(tool_names),
         deps_type=TicketDeps,
+        output_retries=2,
         toolsets=[build_canonical_toolset(tool_names)],
     )

@@ -10,7 +10,7 @@ from pydantic_ai.messages import AgentStreamEvent, FunctionToolCallEvent, Functi
 from pydantic_ai.usage import UsageLimits
 from schemas import RunTicketRequest, TicketDeps, TicketResult
 
-RUN_REQUEST_LIMIT = 200
+RUN_REQUEST_LIMIT = 80
 
 
 def build_ticket_prompt(request: RunTicketRequest) -> str:
